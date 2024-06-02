@@ -1,0 +1,176 @@
+markdown
+Copy code
+# Project Documentation
+
+This section provides instructions for setting up and generating Sphinx documentation for the project.
+
+## Prerequisites
+
+Ensure you have Python 3.10 and the required dependencies installed. The dependencies are listed in the `requirements.txt` file.
+
+## Setting Up Sphinx Documentation
+
+Follow these steps to set up Sphinx documentation for the project.
+
+### 1. Initialize Sphinx
+
+First, initialize Sphinx in the `docs` directory. Run the following command in your project root directory:
+
+```sh
+sphinx-quickstart docs
+Choose the option to separate source and build directories when prompted.
+
+2. Directory Structure
+Ensure your project directory looks like this:
+
+css
+Copy code
+project_root/
+├── src/
+│   ├── __init__.py
+│   ├── analyze_serving_and_deliver.py
+│   ├── connections.py
+│   ├── fetch_json_response.py
+│   ├── main.py
+│   ├── process_json_to_staged.py
+│   ├── process_serving_to_mysql.py
+│   ├── process_serving_to_postgres.py
+│   └── process_staged_to_serving.py
+├── docs/
+│   ├── build/
+│   ├── source/
+│   │   ├── _static/
+│   │   ├── _templates/
+│   │   ├── conf.py
+│   │   ├── index.rst
+│   │   └── modules.rst
+│   ├── Makefile
+├── tests/
+│   ├── __init__.py
+│   └── test_process_staged_to_serving.py
+├── requirements.txt
+├── Dockerfile
+└── Makefile
+3. Configure conf.py
+Open your docs/source/conf.py file and add the following lines to include the src directory in the sys.path:
+
+python
+Copy code
+import os
+import sys
+sys.path.insert(0, os.path.abspath('../../src'))
+
+# -- Project information -----------------------------------------------------
+
+project = 'Your Project Name'
+author = 'Your Name'
+
+# -- General configuration ---------------------------------------------------
+
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.viewcode',
+]
+
+templates_path = ['_templates']
+exclude_patterns = []
+
+# -- Options for HTML output -------------------------------------------------
+
+html_theme = 'alabaster'
+html_static_path = ['_static']
+4. Update the Makefile
+Ensure your Makefile is set up to install all dependencies and generate Sphinx documentation. Here is an example Makefile:
+
+makefile
+Copy code
+# Makefile
+
+# Define the Python interpreter and virtual environment directory
+PYTHON := python3
+VENV_DIR := venv
+
+# Define directories
+SRC_DIR := src
+TEST_DIR := tests
+DOCS_DIR := docs
+DOCS_SRC_DIR := docs/source
+
+# Docker image name
+IMAGE_NAME := jobs_data_analysis
+
+# Define the path to the requirements file
+REQUIREMENTS := requirements.txt
+
+# Mark venv as a phony target
+.PHONY: venv
+# Create a virtual environment and install dependencies
+venv:
+	$(PYTHON) -m venv $(VENV_DIR)
+	$(VENV_DIR)/bin/pip install --upgrade pip
+	$(VENV_DIR)/bin/pip install -r $(REQUIREMENTS)
+
+# Mark format as a phony target
+.PHONY: format
+# Format code with Black
+format: venv
+	$(VENV_DIR)/bin/black $(SRC_DIR) $(TEST_DIR)
+
+# Mark test as a phony target
+.PHONY: test
+# Run pytest
+test: venv
+	$(VENV_DIR)/bin/pytest $(TEST_DIR)
+
+# Mark build as a phony target
+.PHONY: build
+# Build the Docker image
+build: format test
+	docker build -t $(IMAGE_NAME) .
+
+# Mark clean as a phony target
+.PHONY: clean
+# Clean up Python cache files
+clean:
+	find . -type f -name '*.pyc' -delete
+	find . -type d -name '__pycache__' -exec rm -r {} +
+
+# Mark run as a phony target
+.PHONY: run
+# Run the Docker container
+run:
+	docker run --rm $(IMAGE_NAME)
+
+# Mark docs as a phony target
+.PHONY: docs
+# Generate Sphinx documentation
+docs: venv
+	$(VENV_DIR)/bin/sphinx-apidoc -o $(DOCS_SRC_DIR) $(SRC_DIR)
+	$(MAKE) -C $(DOCS_DIR) html
+
+# Mark all as a phony target
+.PHONY: all
+# Target to perform all necessary steps: clean, set up venv, format, test, build, and generate docs
+all: clean venv format test build docs
+5. Install Dependencies
+Ensure all dependencies are listed in your requirements.txt file:
+
+plaintext
+Copy code
+sphinx
+sphinx-autodoc-typehints
+sphinx_rtd_theme
+psycopg2
+python-dotenv
+mysql-connector-python
+omegaconf
+# Add any other dependencies required by your project
+6. Build Documentation
+Run the following commands to clean the project, set up the virtual environment, and generate the documentation:
+
+sh
+Copy code
+make clean
+make docs
+By following these steps, you should be able to set up and generate Sphinx documentation for your project successfully.

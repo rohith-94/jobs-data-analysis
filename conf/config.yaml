@@ -1,0 +1,38 @@
+rapid_api:
+  url: https://jobs-api14.p.rapidapi.com/list
+  host: jobs-api14.p.rapidapi.com
+
+job_params:
+  queries: ["digital marketing","paid search","ppc","seo","social media"]
+  location: Vancouver
+  language: en_GB
+  remoteOnly: "false"
+  datePosted: 3days
+  employmentTypes: fulltime;parttime;contractor
+  indices: ["0","1","2","3","4"]
+
+connections:
+  postgres:
+    host: pg-5162024-sr-first.g.aivencloud.com
+    port: 24441
+    username: avnadmin
+    database: serving
+  mysql:
+    host: mysql-rs-sr-first.e.aivencloud.com
+    port: 24441
+    username: avnadmin
+    database: serving
+
+paths:
+  base: /home/rohithsooram/data/
+  raw: ${paths.base}json_dump/
+  staged:
+    csv_path: ${paths.base}staged/jobs.csv
+    parquet_path: ${paths.base}staged/jobs.parquet
+  serving:
+    parquet_path: ${paths.base}serving/filtered_jobs.parquet
+
+email:
+  sender_email: "mail.deliver24@gmail.com"
+  receiver_email: "rohith.lfa28@gmail.com; bhavishyareddy1998@gmail.com"
+  subject: "Jobs generated for today, Please check"
